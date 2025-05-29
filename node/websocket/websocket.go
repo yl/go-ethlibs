@@ -72,7 +72,7 @@ type connection struct {
 	conn *websocket.Conn
 	ctx  context.Context
 
-	counter                uint64
+	counter                uint32
 	chToBackend            chan jsonrpc.Request
 	chSubscriptionRequests chan *subscriptionRequest
 	chOutboundRequests     chan *outboundRequest
@@ -109,7 +109,7 @@ func NewConnection(ctx context.Context, url string) (Connection, error) {
 		conn:                   conn,
 		url:                    url,
 		ctx:                    ctx,
-		counter:                rand.Uint64(),
+		counter:                rand.Uint32(),
 		chToBackend:            make(chan jsonrpc.Request),
 		chSubscriptionRequests: make(chan *subscriptionRequest),
 		chOutboundRequests:     make(chan *outboundRequest),
@@ -383,7 +383,7 @@ func (c *connection) loop() {
 
 func (c *connection) nextID() jsonrpc.ID {
 	return jsonrpc.ID{
-		Num: atomic.AddUint64(&c.counter, 1),
+		Num: uint64(atomic.AddUint32(&c.counter, 1)),
 	}
 }
 
