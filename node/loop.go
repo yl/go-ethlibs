@@ -21,7 +21,7 @@ func newLoopingTransport(ctx context.Context, conn connCloser, readMessage readM
 	t := loopingTransport{
 		conn:                   conn,
 		ctx:                    ctx,
-		counter:                rand.Uint64(),
+		counter:                rand.Uint32(),
 		chToBackend:            make(chan jsonrpc.Request),
 		chSubscriptionRequests: make(chan *subscriptionRequest),
 		chOutboundRequests:     make(chan *outboundRequest),
@@ -76,7 +76,7 @@ type loopingTransport struct {
 	conn connCloser
 	ctx  context.Context
 
-	counter                uint64
+	counter                uint32
 	chToBackend            chan jsonrpc.Request
 	chSubscriptionRequests chan *subscriptionRequest
 	chOutboundRequests     chan *outboundRequest
@@ -348,7 +348,7 @@ func (t *loopingTransport) loop() {
 }
 
 func (t *loopingTransport) nextID(seed jsonrpc.ID) jsonrpc.ID {
-	n := atomic.AddUint64(&t.counter, 1)
+	n := uint64(atomic.AddUint32(&t.counter, 1))
 	if seed.IsString {
 		return jsonrpc.ID{
 			Num:      0,
